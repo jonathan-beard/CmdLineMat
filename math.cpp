@@ -339,7 +339,7 @@ main( int argc, char **argv )
                                               "Set maximum digit to use" ) );
    cmd.addOption( new Option< std::string >( logfile,
                                              "-log",
-                                             "Set a log file" ) );
+                                             "Set a log file, .csv extension added by default" ) );
    cmd.addOption( new Option< bool >( help,
                                       "-h",
                                       "Print menu and exit" ) );
@@ -355,7 +355,7 @@ main( int argc, char **argv )
    if( logfile.length() > 0 )
    {
       /** log is global **/
-      userlog.open( logfile + ".md" ); 
+      userlog.open( logfile + ".csv" ); 
    }
  
    board blackboard( min, max );

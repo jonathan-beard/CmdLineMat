@@ -14,5 +14,5 @@ and you'll get the exe.
 You can set quite a few parameters from the
 command line. To write a log of all the 
 output use the -log xxx name. The extension
-will be a .md but you can change it if you
+will be a .csv but you can change it if you
 like within the source code.
