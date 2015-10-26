@@ -1,0 +1,3 @@
+[submodule "cmdargs"]
+	path = cmdargs
+	url = git@github.com:jonathan-beard/cmdargs.git
