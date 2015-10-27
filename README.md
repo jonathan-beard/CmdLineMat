@@ -1,4 +1,4 @@
-# CmdLineMat
+# CmdLineMath
 
 So this will currently work on OS X only.
 The CmdLine args package is in CmdArgs and 
