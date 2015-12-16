@@ -76,6 +76,12 @@ public:
    virtual bool run( const std::int64_t a, 
                      const std::int64_t b ) = 0;
    
+   virtual bool constrain( const std::int64_t a,
+                           const std::int64_t b )
+   {
+       return( true );
+   }
+   
 protected:
    /** vars **/
    const std::string what = { "What does: " };
@@ -185,8 +191,13 @@ public:
 
       /** feed random numbers **/
       std::uniform_int_distribution< std::int64_t  > num_gen( min, max );
-		const auto num_a( num_gen( gen ) );
-		const auto num_b( num_gen( gen ) );
+      auto num_a( num_gen( gen ) );
+	  auto num_b( num_gen( gen ) );
+      while( ! p->constrain( num_a, num_b ) )
+      {
+         num_a = num_gen( gen );
+	     num_b = num_gen( gen );
+      }
       count++;
       if( p->run( num_a, num_b ) )
       {
@@ -255,7 +266,23 @@ public:
 class sub : public problem
 {
 public:
-   sub( std::ostream &logstream ) : problem ( logstream ){}
+   sub( std::ostream &logstream,
+        const bool noneg ) : problem ( logstream ),
+                             noneg( noneg ){}
+
+   
+   virtual bool constrain( const std::int64_t a,
+                           const std::int64_t b )
+   {
+        if( noneg )
+        {
+            if( b > a )
+            {
+                return( false );
+            }
+        }
+        return( true );
+   }
 
    virtual bool run( const std::int64_t a,
                      const std::int64_t b )
@@ -284,7 +311,8 @@ public:
          return( false );
       }
    }
-
+private:
+   const bool noneg;
 };
 
 
@@ -308,6 +336,7 @@ main( int argc, char **argv )
    std::int64_t min( -9 );
    std::int64_t num_problems( 20 );
    double frac_to_exit( .75 );
+   bool noneg( false );
 
    std::string logfile( "" );
    
@@ -344,6 +373,10 @@ main( int argc, char **argv )
                                       "-h",
                                       "Print menu and exit" ) );
 
+   cmd.addOption( new Option< bool >( noneg,
+                                      "-noneg",
+                                      "prevent the user from getting negative numbers" ) );
+
    cmd.processArgs( argc, argv );
    if( help )
    {
@@ -366,7 +399,7 @@ main( int argc, char **argv )
    }
    if( subtraction )
    {
-      blackboard.add( new sub( userlog ) );
+      blackboard.add( new sub( userlog, noneg ) );
    }
 
 	
