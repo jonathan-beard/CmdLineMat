@@ -29,6 +29,7 @@
 #include <iostream>
 #include <cstdlib>
 #include <cstdint>
+#include <iomanip>
 #include <array>
 #include <random>
 #include <unistd.h>
@@ -42,10 +43,12 @@
 #include <signal.h>
 #include <unistd.h>
 #include <iomanip>
+#include <thread>
 
 /** unfortunate, but sig handler so...**/
 static std::ofstream userlog;
 static double fraction_correct = 0.0;
+decltype( std::chrono::system_clock::now() ) start;
 
 static
 void sig_handler( int sig )
@@ -125,16 +128,25 @@ protected:
    bool check_ans( const T &ans, 
                    const T &key ) 
    {
+      auto end = std::chrono::system_clock::now();
+      std::chrono::duration< double > diff = end-start;
       if( ans  == key )
       {
-      	const auto goodstr( std::to_string( ans ) + " is correct, GOOD JOB!!" );	
-      	output_stream << goodstr << std::endl;
-      	do_speech( goodstr );
-         return( true );
+        std::stringstream ss;
+        ss <<  ans  <<  " is correct in " << 
+            std::setprecision(2) << diff.count() << 
+                " seconds , GOOD JOB!!" << std::endl;	
+
+        output_stream << ss.str() << "\n";
+      	do_speech( ss.str() );
+        return( true );
       }
-      const auto badstr( std::to_string( ans ) + " is incorrect, lets try another" );
-      output_stream << badstr << std::endl;
-      do_speech( badstr );
+      std::stringstream ss;
+      ss << ans <<  " is incorrect in " << 
+        std::setprecision( 2 ) << diff.count() << 
+            " seconds, lets maybe try another" << std::endl;
+      output_stream << ss.str() << "\n";
+      do_speech( ss.str() );
       return( false );
    }
 
@@ -199,10 +211,20 @@ public:
 	     num_b = num_gen( gen );
       }
       count++;
-      if( p->run( num_a, num_b ) )
+      
+      auto function([&]( const std::int64_t numA, const std::int64_t numB ) -> void
       {
-         correct++;
-      }
+        if( p->run( numA, numB ) )
+        {
+           correct++;
+        }
+        return;
+      } );
+
+      start = std::chrono::system_clock::now();
+      std::thread th( function, num_a, num_b );
+      //FIXME, come back here
+      th.join();
    }
 
    std::uint32_t getCount()
@@ -246,6 +268,7 @@ public:
       std::cin >> ans;
       if( check_ans( ans, key ) )
       {
+         
          if( logstream.good() )
          {
             logstream << "correct,   " << prob << ", " << ans << std::endl;
@@ -403,10 +426,10 @@ main( int argc, char **argv )
    }
 
 	
-   while( blackboard.getCount() < num_problems  or fraction_correct < frac_to_exit )
-	{
+   while( blackboard.getCount() < num_problems  || fraction_correct < frac_to_exit )
+   {
       blackboard();
-	   fraction_correct = blackboard.getPercentageCorrect();
+	  fraction_correct = blackboard.getPercentageCorrect();
    }
 
    if( userlog.is_open() )
