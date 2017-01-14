@@ -87,10 +87,14 @@ static void updateStats( STAT &st, const double curr_dur ) noexcept
 static void printStats( const std::string &&type, const STAT &st, std::ostream &stream )
 {
     stream << PURPLE << type << " stats:" << NORMAL << "\n";
-    stream << "perecentage: " <<  std::setprecision( 4 ) << (st.fraction) << "\n";
+    if( st.count == 0 ){ stream << RED << "none" << NORMAL << "\n"; }
+    else
+    {
+    stream << "percentage: " <<  std::setprecision( 4 ) << (st.fraction*100) << "%\n";
     stream << "min time: " << std::setprecision( 2 ) << st.min_time << "s\n";
     stream << "avg time: " << std::setprecision( 2 ) << st.avg_time << "s\n";
     stream << "max time: " << std::setprecision( 2 ) << st.max_time << "s\n\n";
+    }
 }
 
 
@@ -176,11 +180,29 @@ protected:
    fix_up_neg( const std::string &str )
    {
         std::stringstream ss;
+        bool prior_char( false );
         for( auto i( 0 ); i < str.length(); i++ )
         {
             if( str[ i ] == '-' && i == 0 )
             {
                 ss << "negative ";
+            }
+            else if( str[ i ] == '+' || str[ i ] == ':'  )
+            {
+                prior_char = true;
+                ss << str[ i ];
+            }
+            else if( str[ i ] == '-' && i != 0 )
+            {
+                if( prior_char )
+                {
+                    ss << " negative ";
+                    prior_char = false;
+                }
+                else
+                {
+                    ss << str[ i ];
+                }
             }
             else
             {
@@ -250,7 +272,7 @@ protected:
       std::stringstream speach_ss;
       speach_ss << ans <<  " is incorrect " << "in " << 
         std::setprecision( 2 ) << time << 
-            " seconds, lets maybe try another" << std::endl;
+            " seconds, lets try another" << std::endl;
       updateStats( incorrect, time );
       
       logstream << BLUE << "incorrect,  " << prob << ", " << ans << ", " << time << std::endl;
@@ -519,5 +541,7 @@ main( int argc, char **argv )
    {
       userlog.close();
    }
+   printStats( "correct", correct, std::cout );
+   printStats( "incorrect", incorrect, std::cout );
    return( EXIT_SUCCESS );
 }
