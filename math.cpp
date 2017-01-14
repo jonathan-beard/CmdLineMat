@@ -88,9 +88,9 @@ static void printStats( const std::string &&type, const STAT &st, std::ostream &
 {
     stream << PURPLE << type << " stats:" << NORMAL << "\n";
     stream << "perecentage: " <<  std::setprecision( 4 ) << (st.fraction) << "\n";
-    stream << "min time: " << std::setprecision( 2 ) << st.min_time << "\n";
-    stream << "avg time: " << std::setprecision( 2 ) << st.avg_time << "\n";
-    stream << "max time: " << std::setprecision( 2 ) << st.max_time << "\n\n";
+    stream << "min time: " << std::setprecision( 2 ) << st.min_time << "s\n";
+    stream << "avg time: " << std::setprecision( 2 ) << st.avg_time << "s\n";
+    stream << "max time: " << std::setprecision( 2 ) << st.max_time << "s\n\n";
 }
 
 
