@@ -204,6 +204,10 @@ protected:
                     ss << str[ i ];
                 }
             }
+            else if( str[ i ] == 'x' )
+            {
+                ss << " times ";
+            }
             else
             {
                 ss << str[ i ];
@@ -347,7 +351,6 @@ public:
         return;
       } );
 
-      start = std::chrono::system_clock::now();
       std::thread th( function, num_a, num_b );
       
       th.join();
@@ -378,6 +381,7 @@ public:
       std::memset( buffer, '\0', 128 );
       std::size_t ret_count( 0 );
       char *text_ans( nullptr );
+      start = std::chrono::system_clock::now();
       while( ret_count == 0 )
       {
          text_ans = getInput( buffer, 128, ret_count );
@@ -425,6 +429,7 @@ public:
       std::memset( buffer, '\0', 128 );
       std::size_t ret_count( 0 );
       char *text_ans( nullptr );
+      start = std::chrono::system_clock::now();
       while( ret_count == 0 )
       {
          text_ans = getInput( buffer, 128, ret_count );
@@ -436,6 +441,36 @@ public:
    }
 private:
    const bool noneg;
+};
+
+class mult  : public problem
+{
+public:
+   mult( std::ostream &logstream ) : problem( logstream ){}
+
+   virtual bool run( const std::int64_t a,
+                     const std::int64_t b )
+   {
+      const auto prob( make_prob( a, b, "x" ) );
+      const auto key( a * b );
+      ask_prob( prob );
+      do_speech( what + prob + " equal" );
+      std::int64_t ans( 0 );
+      char buffer[ 128 ];
+      std::memset( buffer, '\0', 128 );
+      std::size_t ret_count( 0 );
+      char *text_ans( nullptr );
+      start = std::chrono::system_clock::now();
+      while( ret_count == 0 )
+      {
+         text_ans = getInput( buffer, 128, ret_count );
+         if( text_ans == nullptr && ret_count != 0 ){ std::cout << "invalid input detected, please only numbers\n"; ret_count = 0;}
+         /** else spin for answer **/
+      }
+      ans = strtoll( text_ans, nullptr, 10);
+      double time( 0.0 );
+      return( check_ans( prob, ans, key, time, logstream ) );
+   }
 };
 
 
@@ -528,6 +563,10 @@ main( int argc, char **argv )
    if( subtraction )
    {
       blackboard.add( new sub( userlog, noneg ) );
+   }
+   if( multiplication )
+   {
+      blackboard.add( new mult( userlog ) );
    }
 
 	
