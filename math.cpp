@@ -261,7 +261,7 @@ protected:
             std::setprecision( 2 ) << time << 
                 " seconds, " << "GOOD JOB!!" << std::endl;	
       	updateStats( correct, time);
-        logstream << BLUE << "correct,  " << prob << ", " << ans << ", " << time << std::endl;
+        logstream << "correct,  " << prob << ", " << ans << ", " << time << std::endl;
 
         do_speech( speach_ss.str() );
         return( true );
@@ -270,16 +270,16 @@ protected:
       std::stringstream ss;
       ss << RED << ans <<  " is incorrect " << NORMAL << "in " << 
         std::setprecision( 2 ) << time << 
-            " seconds, lets try another" << std::endl;
+            " seconds, the correct answer is ( "<< key << " )" << std::endl;
       output_stream << ss.str() << "\n";
       
       std::stringstream speach_ss;
       speach_ss << ans <<  " is incorrect " << "in " << 
         std::setprecision( 2 ) << time << 
-            " seconds, lets try another" << std::endl;
+            " seconds, the correct answer is ( "<< key << " )" << std::endl;
       updateStats( incorrect, time );
       
-      logstream << BLUE << "incorrect,  " << prob << ", " << ans << ", " << time << std::endl;
+      logstream <<  "incorrect,  " << prob << ", " << ans << ", " << time << std::endl;
       do_speech( speach_ss.str() );
       return( false );
    }
@@ -498,7 +498,7 @@ main( int argc, char **argv )
    std::int64_t max(  9 );
    std::int64_t min( -9 );
    std::int64_t num_problems( 20 );
-   double frac_to_exit( .75 );
+   double frac_to_exit( -1.0 );
    bool noneg( false );
 
    std::string logfile( "" );
@@ -569,9 +569,10 @@ main( int argc, char **argv )
       blackboard.add( new mult( userlog ) );
    }
 
-	
-   while( (correct.count + incorrect.count) < num_problems  || 
-           correct.fraction < frac_to_exit )
+   while( ( frac_to_exit > 0 ? 
+                (correct.fraction < frac_to_exit) : 
+                (correct.count + incorrect.count) < num_problems
+           ) )
    {
       blackboard();
    }
